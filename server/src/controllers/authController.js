@@ -1,4 +1,4 @@
-import { Role } from "../../generated/prisma/index.js"
+import { Role } from "../generated/prisma/index.js"
 import jwt from "jsonwebtoken"
 import  bcrypt from "bcryptjs";
 import { db } from "../db/db.js";
