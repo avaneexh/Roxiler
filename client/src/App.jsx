@@ -11,10 +11,11 @@ import Signup from "./pages/Signup";
 import AdminLayout from "./pages/admin/AdminLayout";
 // import AdminHome from "./pages/admin/AdminHome";
 // import AdminUsers from "./pages/admin/AdminUsers";
-import StoreLayout from "./pages/userStore/StoreLayout";
+import StoreLayout from "./pages/userStore/storeLayout";
 // import StoreHome from "./pages/store/StoreHome";
 // import StoreInventory from "./pages/store/StoreInventory";
 import UserLayout from "./pages/user/UserLayout";
+import Navbar from "./components/Navbar";
 // import UserHome from "./pages/user/UserHome";
 // import NotFound from "./pages/NotFound";
 
@@ -28,7 +29,9 @@ function App(){
     : "/login";
 
   return (
-    <BrowserRouter>
+    <div>
+      <Navbar/>
+      <div className="pt-16">
       <Routes>
         <Route path="/" element={<Navigate to={rootRedirect} replace />} /> 
         <Route path="/login" element={<GuestOnly><Login/></GuestOnly>} />
@@ -60,7 +63,8 @@ function App(){
         
         {/* <Route path="*" element={<NotFound/>} /> */}
       </Routes>
-    </BrowserRouter>
+      </div>
+    </div>
   );
 }
 

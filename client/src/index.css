@@ -2,4 +2,8 @@
 @plugin "daisyui";
 @tailwind utilities;
 
-@custom-variant dark (&:where(.dark, .dark *));
+@layer base {
+  .dark {
+    color-scheme: dark;
+  }
+}
