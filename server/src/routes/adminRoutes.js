@@ -8,7 +8,7 @@ import {
   createStore,
   getAllRatings,
 } from '../controllers/adminController.js';
-import { authMiddleware, checkAdmin } from '../middleware/auth.js';
+import { authMiddleware, checkAdmin } from "../middleware/authMiddlewares.js";
 
 const adminRoutes = express.Router();
 

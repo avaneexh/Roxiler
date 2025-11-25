@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from './routes/authRoutes.js';
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
   res.send("Hello From Roxiler🔥🔥");
 });
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
