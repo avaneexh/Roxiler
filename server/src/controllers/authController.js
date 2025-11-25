@@ -1,7 +1,8 @@
-import { Role } from "../generated/prisma/index.js"
 import jwt from "jsonwebtoken"
 import  bcrypt from "bcryptjs";
 import { db } from "../db/db.js";
+import { Role } from "@prisma/client";
+
 
 export const register = async (req, res) => {
     const {email, password, name, address} = req.body;
@@ -110,7 +111,7 @@ export const login = async (req, res) => {
             email:user.email,
             name:user.name,
             role:user.role,
-            address:address
+            address:user.address
          }   
         })
 

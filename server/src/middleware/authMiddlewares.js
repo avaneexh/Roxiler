@@ -29,7 +29,6 @@ export const authMiddleware = async (req, res, next) => {
             },
             select:{
                 id:true,
-                image:true,
                 name:true,
                 email:true,
                 role:true
