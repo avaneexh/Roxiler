@@ -15,12 +15,25 @@ const PORT = process.env.PORT || 8000;
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin:"*",
-    credentials: true,
-  })
-);
+const WHITELIST = [
+  "https://roxiler-kappa.vercel.app",
+  "http://localhost:5173" 
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (WHITELIST.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With","jwt"],
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
+}));
+
 
 app.get("/", (req, res) => {
   res.send("Hello From Roxiler🔥🔥");
