@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 
 
 
-const API_BASE = "/admin"; // change to '/api/admin' if needed
+const API_BASE = "/admin"; 
 
 export const useAdminStore = create((set, get) => ({
   // Admin dashboard

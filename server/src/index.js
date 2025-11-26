@@ -30,7 +30,7 @@ app.use(cors({
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With","jwt"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
 }));
 

@@ -192,7 +192,7 @@ export default function StoreDashboard() {
                   style={{ borderColor }}
                 >
                   {/* avatar / initial */}
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div
                       className="w-10 h-10 rounded-full flex items-center justify-center font-semibold"
                       style={{
