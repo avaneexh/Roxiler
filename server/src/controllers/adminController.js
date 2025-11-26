@@ -1,7 +1,8 @@
-import { Role } from "@prisma/client";
 import jwt from "jsonwebtoken"
 import  bcrypt from "bcryptjs";
 import { db } from "../db/db.js";
+import pkg from '@prisma/client';
+const { Role } = pkg;
 
 export const getDashboardStats = async (req, res) => {
   try {
