@@ -34,16 +34,6 @@ app.use(cors({
   methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
 }));
 
-app.options("*", (req, res) => {
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  return res.sendStatus(204);
-});
-
-app.use((req, res, next) => {
-  console.log("REQ ->", req.method, req.originalUrl, "Origin:", req.get("Origin"));
-  next();
-});
 
 app.get("/", (req, res) => {
   res.send("Hello From Roxiler🔥🔥");
