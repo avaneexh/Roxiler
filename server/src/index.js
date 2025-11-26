@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin:"https://roxiler-kappa.vercel.app/",
+    origin:"*",
     credentials: true,
   })
 );
