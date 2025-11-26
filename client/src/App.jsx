@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate  } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
@@ -9,11 +8,7 @@ import {Loader} from "lucide-react"
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import AdminLayout from "./pages/admin/AdminLayout";
-// import AdminHome from "./pages/admin/AdminHome";
-// import AdminUsers from "./pages/admin/AdminUsers";
-import StoreLayout from "./pages/userStore/storeLayout";
-// import StoreHome from "./pages/store/StoreHome";
-// import StoreInventory from "./pages/store/StoreInventory";
+import StoreLayout from "./pages/userStore/StoreLayout";;
 import UserLayout from "./pages/user/UserLayout";
 import Navbar from "./components/Navbar";
 import AdminAllUsers from "./components/AdminAllUsers";
@@ -28,8 +23,6 @@ import UserStores from "./pages/user/UserStores";
 import MyRatings from "./pages/user/MyRatings";
 import ChangePassword from "./components/ChangePassword";
 import StoreDashboard from "./pages/userStore/StoreDash";
-// import UserHome from "./pages/user/UserHome";
-// import NotFound from "./pages/NotFound";
 
 function App(){
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -87,8 +80,6 @@ function App(){
           </Route>
         </Route>
 
-        
-        {/* <Route path="*" element={<NotFound/>} /> */}
       </Routes>
       </div>
     </div>
