@@ -80,4 +80,24 @@ export const useAuthStore = create((set) => ({
       toast.warning("Logged out locally", "Session cleared", 3000);
     }
   },
+
+  changePassword: async ({ currentPassword, newPassword }) => {
+    try {
+      set({ loading: true });
+      // console.log("change password");
+      
+      const res = await axiosInstance.post("/auth/changePassword", {
+        currentPassword,
+        newPassword,
+      });
+      toast.success(res.data?.message || "Password changed");
+      return res.data;
+    } catch (err) {
+      console.error("changePassword error", err);
+      toast.error(err?.response?.data?.message || "Failed to change password");
+      throw err;
+    } finally {
+      set({ loading: false });
+    }
+  },
 }));

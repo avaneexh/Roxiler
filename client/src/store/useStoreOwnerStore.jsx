@@ -1,89 +1,115 @@
-import { create } from "zustand";
+import create from "zustand";
 import { axiosInstance } from "../lib/axios";
-import toast from "react-hot-toast";
+
+const API_BASE = "/store"; // change to '/api/owner' or whatever your server uses
 
 export const useStoreOwnerStore = create((set, get) => ({
-  inventory: [],
-  orders: [],
+  // data
+  store: null,       
+  stats: {            
+    average_rating: 0,
+    total_ratings: 0,
+  },
+  ratings: [],        // array of ratings (with user info)
+  count: 0,           // for ratings endpoint (if returned)
+
+  // ui state
   loading: false,
+  error: null,
 
-  fetchInventory: async () => {
-    set({ loading: true });
-    try {
-      const res = await axiosInstance.get("/store/inventory");
-      set({ inventory: res.data.items || [] });
-      return res.data;
-    } catch (err) {
-      console.error("fetchInventory", err);
-      toast.error("Failed to load inventory");
-      throw err;
-    } finally {
-      set({ loading: false });
-    }
-  },
+  // actions
+  setStore: (store) => set({ store }),
+  setStats: (stats) => set({ stats }),
+  setRatings: (ratings) => set({ ratings, count: ratings?.length ?? 0 }),
+  setLoading: (loading) => set({ loading }),
+  setError: (error) => set({ error }),
 
-  createProduct: async (payload) => {
-    try {
-      const res = await axiosInstance.post("/store/inventory", payload);
-      set((s) => ({ inventory: [res.data.item, ...s.inventory] }));
-      toast.success("Product added");
-      return res.data.item;
-    } catch (err) {
-      console.error("createProduct", err);
-      toast.error("Failed to add product");
-      throw err;
-    }
-  },
+  clear: () =>
+    set({
+      store: null,
+      stats: { average_rating: 0, total_ratings: 0 },
+      ratings: [],
+      count: 0,
+      loading: false,
+      error: null,
+    }),
 
-  updateProduct: async (id, payload) => {
+  // fetch dashboard: store + stats + ratings
+  fetchDashboard: async (opts = {}) => {
+    const { withLoader = true } = opts;
     try {
-      const res = await axiosInstance.put(`/store/inventory/${id}`, payload);
-      set((s) => ({ inventory: s.inventory.map((it) => (it.id === id ? res.data.item : it)) }));
-      toast.success("Product updated");
-      return res.data.item;
+      if (withLoader) set({ loading: true, error: null });
+      const res = await axiosInstance.get(`${API_BASE}/dashboard`);
+      // response shape expected:
+      // { success: true, data: { store, stats: { average_rating, total_ratings }, ratings } }
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || "Failed to fetch dashboard");
+      }
+      const d = data.data;
+      set({
+        store: d.store ?? null,
+        stats: d.stats ?? { average_rating: 0, total_ratings: 0 },
+        ratings: d.ratings ?? [],
+        count: (d.ratings ?? []).length,
+        loading: false,
+        error: null,
+      });
+      return d;
     } catch (err) {
-      console.error("updateProduct", err);
-      toast.error("Update failed");
-      throw err;
-    }
-  },
-
-  deleteProduct: async (id) => {
-    const prev = get().inventory;
-    set((s) => ({ inventory: s.inventory.filter((it) => it.id !== id) }));
-    try {
-      await axiosInstance.delete(`/store/inventory/${id}`);
-      toast.success("Product removed");
-      return true;
-    } catch (err) {
-      set({ inventory: prev });
-      console.error("deleteProduct", err);
-      toast.error("Delete failed");
+      console.error("fetchDashboard error:", err);
+      set({ loading: false, error: err?.response?.data || err.message || err });
       throw err;
     }
   },
 
-  fetchOrders: async () => {
+  // fetch store (summary)
+  fetchStore: async (opts = {}) => {
+    const { withLoader = true } = opts;
     try {
-      const res = await axiosInstance.get("/store/orders");
-      set({ orders: res.data.orders || [] });
-      return res.data;
+      if (withLoader) set({ loading: true, error: null });
+      const res = await axiosInstance.get(`${API_BASE}/store`);
+      // response shape expected:
+      // { success: true, store: { ... , stats: { average_rating, total_ratings } } }
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || "Failed to fetch store");
+      }
+      set({
+        store: data.store ?? null,
+        stats: data.store?.stats ?? { average_rating: 0, total_ratings: 0 },
+        loading: false,
+        error: null,
+      });
+      return data.store;
     } catch (err) {
-      console.error("fetchOrders", err);
-      toast.error("Failed to load orders");
+      console.error("fetchStore error:", err);
+      set({ loading: false, error: err?.response?.data || err.message || err });
       throw err;
     }
   },
 
-  updateOrderStatus: async (orderId, status) => {
+  // fetch ratings list
+  fetchRatings: async (opts = {}) => {
+    const { withLoader = true } = opts;
     try {
-      const res = await axiosInstance.patch(`/store/orders/${orderId}`, { status });
-      set((s) => ({ orders: s.orders.map((o) => (o.id === orderId ? res.data.order : o)) }));
-      toast.success("Order updated");
-      return res.data.order;
+      if (withLoader) set({ loading: true, error: null });
+      const res = await axiosInstance.get(`${API_BASE}/ratings`);
+      // expected: { success: true, count, ratings }
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || "Failed to fetch ratings");
+      }
+      set({
+        ratings: data.ratings ?? [],
+        count: data.count ?? (data.ratings ?? []).length,
+        loading: false,
+        error: null,
+      });
+      return { ratings: data.ratings ?? [], count: data.count ?? 0 };
     } catch (err) {
-      console.error("updateOrderStatus", err);
-      toast.error("Failed to update order");
+      console.error("fetchRatings error:", err);
+      set({ loading: false, error: err?.response?.data || err.message || err });
       throw err;
     }
   },

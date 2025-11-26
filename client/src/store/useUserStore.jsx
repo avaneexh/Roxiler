@@ -3,7 +3,6 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
 export const useUserStore = create((set, get) => ({
-  // state
   profile: null,
   profileLoading: false,
 
@@ -16,170 +15,141 @@ export const useUserStore = create((set, get) => ({
   favorites: [],
   favoritesLoading: false,
 
-  // --- profile ---
-  fetchProfile: async () => {
-    set({ profileLoading: true });
+  stores: [], 
+  storesLoading: false,
+  page: 1,
+  perPage: 20,
+  totalCount: 0,
+
+  myRatings: [],  
+  myRatingsLoading: false,
+
+
+  fetchStores: async ({ page = 1, limit = 20, q = "" } = {}) => {
+    set({ storesLoading: true, page, perPage: limit });
     try {
-      const res = await axiosInstance.get("/user/profile");
-      set({ profile: res.data.user ?? res.data });
-      return res.data;
+      const params = { page, limit };
+      if (q) params.q = q;
+      // console.log("stores calling", params);
+      
+      const res = await axiosInstance.get("/user/stores", { params });
+      const data = res.data ?? {};
+      const stores = data.stores ?? [];
+      set({
+        stores,
+        totalCount: data.count ?? stores.length,
+        page: data.page ?? page,
+        perPage: data.perPage ?? limit,
+      });
+      return data;
     } catch (err) {
-      console.error("fetchProfile", err);
-      toast.error("Failed to load profile");
+      console.error("fetchStores error:", err);
+      toast.error(err?.response?.data?.message || "Failed to load stores");
       throw err;
     } finally {
-      set({ profileLoading: false });
+      set({ storesLoading: false });
     }
   },
 
-  updateProfile: async (payload) => {
-    set({ profileLoading: true });
-    try {
-      const res = await axiosInstance.put("/user/profile", payload);
-      set({ profile: res.data.user ?? res.data });
-      toast.success("Profile updated");
-      return res.data;
-    } catch (err) {
-      console.error("updateProfile", err);
-      toast.error("Failed to update profile");
-      throw err;
-    } finally {
-      set({ profileLoading: false });
-    }
-  },
+  rateStore: async (storeId, { rating, comment = null }) => {
+    const prevStores = get().stores;
+    const prevMyRatings = get().myRatings;
 
-  // --- orders ---
-  fetchOrders: async (params = {}) => {
-    set({ ordersLoading: true });
-    try {
-      const res = await axiosInstance.get("/user/orders", { params });
-      set({ orders: res.data.orders ?? res.data });
-      return res.data;
-    } catch (err) {
-      console.error("fetchOrders", err);
-      toast.error("Failed to load orders");
-      throw err;
-    } finally {
-      set({ ordersLoading: false });
-    }
-  },
+    set((state) => ({
+      stores: state.stores.map((s) =>
+        s.id === storeId ? { ...s, user_rating: rating, user_comment: comment } : s
+      ),
+    }));
 
-  fetchOrder: async (orderId) => {
     try {
-      const res = await axiosInstance.get(`/user/orders/${orderId}`);
-      return res.data.order ?? res.data;
-    } catch (err) {
-      console.error("fetchOrder", err);
-      toast.error("Failed to load order");
-      throw err;
-    }
-  },
+      const res = await axiosInstance.post(`/user/stores/${storeId}/rate`, { rating, comment });
+      toast.success(res.data?.message || "Rating submitted");
 
-  // Example: cancel order
-  cancelOrder: async (orderId) => {
-    // optimistic update: mark cancelled locally then revert on error
-    const prev = get().orders;
-    set((s) => ({ orders: s.orders.map(o => o.id === orderId ? { ...o, status: "cancelling" } : o) }));
-    try {
-      const res = await axiosInstance.post(`/user/orders/${orderId}/cancel`);
-      // replace updated order if returned
-      if (res.data?.order) {
-        set((s) => ({ orders: s.orders.map(o => o.id === orderId ? res.data.order : o) }));
+      try {
+        await get().fetchMyRatings();
+      } catch (e) {
+        // silently ignore
       }
-      toast.success("Order cancellation requested");
+
+
       return res.data;
     } catch (err) {
-      set({ orders: prev }); // rollback
-      console.error("cancelOrder", err);
-      toast.error("Failed to cancel order");
+      set({ stores: prevStores, myRatings: prevMyRatings });
+      console.error("rateStore error:", err);
+      toast.error(err?.response?.data?.message || "Failed to submit rating");
       throw err;
     }
   },
 
-  // --- wallet ---
-  fetchWallet: async () => {
-    set({ walletLoading: true });
+  fetchMyRatings: async () => {
+    set({ myRatingsLoading: true });
     try {
-      const res = await axiosInstance.get("/user/wallet");
-      set({ wallet: res.data.wallet ?? res.data });
-      return res.data;
+      const res = await axiosInstance.get("/user/my-ratings");
+      const data = res.data ?? {};
+      const ratings = data.ratings ?? [];
+      set({ myRatings: ratings });
+      return data;
     } catch (err) {
-      console.error("fetchWallet", err);
-      toast.error("Failed to load wallet");
-      throw err;
-    } finally {
-      set({ walletLoading: false });
-    }
-  },
-
-  // --- favorites / wishlist ---
-  fetchFavorites: async () => {
-    set({ favoritesLoading: true });
-    try {
-      const res = await axiosInstance.get("/user/favorites");
-      set({ favorites: res.data.items ?? res.data });
-      return res.data;
-    } catch (err) {
-      console.error("fetchFavorites", err);
-      toast.error("Failed to load favorites");
+      console.error("fetchMyRatings error:", err);
+      toast.error(err?.response?.data?.message || "Failed to load your ratings");
       throw err;
     } finally {
-      set({ favoritesLoading: false });
+      set({ myRatingsLoading: false });
     }
   },
 
-  addFavorite: async (item) => {
-    // optimistic UI: add locally then call api
-    const prev = get().favorites;
-    set((s) => ({ favorites: [item, ...s.favorites] }));
+  deleteRating: async (ratingId) => {
+    const prevMyRatings = get().myRatings;
+    const prevStores = get().stores;
+    set((state) => ({
+      myRatings: state.myRatings.filter((r) => r.id !== ratingId),
+      stores: state.stores.map((s) =>
+        s.user_rating_id === ratingId ? { ...s, user_rating: null, user_comment: null, user_rating_id: null } : s
+      ),
+    }));
+
     try {
-      const res = await axiosInstance.post("/user/favorites", { itemId: item.id ?? item });
-      toast.success("Added to favorites");
-      // optionally replace with server object
+      const res = await axiosInstance.delete(`/user/ratings/${ratingId}`);
+      toast.success(res.data?.message || "Rating deleted");
       return res.data;
     } catch (err) {
-      set({ favorites: prev }); // rollback
-      console.error("addFavorite", err);
-      toast.error("Failed to add favorite");
+      // rollback
+      set({ myRatings: prevMyRatings, stores: prevStores });
+      console.error("deleteRating error:", err);
+      toast.error(err?.response?.data?.message || "Failed to delete rating");
       throw err;
     }
   },
 
-  removeFavorite: async (itemId) => {
-    const prev = get().favorites;
-    set((s) => ({ favorites: s.favorites.filter((f) => (f.id ?? f) !== itemId) }));
+  refreshStoresAndRatings: async (opts = {}) => {
     try {
-      await axiosInstance.delete(`/user/favorites/${itemId}`);
-      toast.success("Removed from favorites");
+      await Promise.all([get().fetchStores(opts), get().fetchMyRatings()]);
       return true;
     } catch (err) {
-      set({ favorites: prev }); // rollback
-      console.error("removeFavorite", err);
-      toast.error("Failed to remove favorite");
-      throw err;
+      return false;
     }
   },
 
-  // --- misc user endpoints ---
-  changePassword: async (payload) => {
-    try {
-      const res = await axiosInstance.post("/user/change-password", payload);
-      toast.success("Password changed");
-      return res.data;
-    } catch (err) {
-      console.error("changePassword", err);
-      toast.error("Failed to change password");
-      throw err;
-    }
-  },
-
-  // clear user store (useful on logout)
+  // clear user-specific store (call on logout)
   clearUserStore: () => {
     set({
       profile: null,
+      profileLoading: false,
       orders: [],
+      ordersLoading: false,
       wallet: null,
+      walletLoading: false,
       favorites: [],
+      favoritesLoading: false,
+      stores: [],
+      storesLoading: false,
+      page: 1,
+      perPage: 20,
+      totalCount: 0,
+      myRatings: [],
+      myRatingsLoading: false,
     });
   },
 }));
+
+export default useUserStore;
