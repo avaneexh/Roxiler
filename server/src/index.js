@@ -17,7 +17,8 @@ app.use(cookieParser());
 
 const WHITELIST = [
   "http://localhost:5173" ,
-  "https://roxiler-o925.onrender.com"
+  "https://roxiler-o925.onrender.com",
+  "https://roxiler-ten.vercel.app/"
 ];
 
 app.use(cors({
