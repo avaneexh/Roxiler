@@ -1,16 +1,18 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useTheme } from "../../store/useThemeStore";
 
 export default function StoreLayout() {
-  const { authUser } = useAuthStore();
-
+  const { darkMode } = useTheme();
+  const isDark = !!darkMode;
+    
+  const pageBg = isDark ? "bg-black text-white" : "bg-white text-black";
+    
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <main className="p-6">
-        <div className="max-w-9xl mx-auto">
-          <Outlet />
-        </div>
+    <div className={`${pageBg} min-h-screen`}>
+      <main className="p-8 max-w-6xl mx-auto">
+        <Outlet />
       </main>
     </div>
   );

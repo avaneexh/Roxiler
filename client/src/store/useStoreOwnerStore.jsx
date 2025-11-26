@@ -1,7 +1,7 @@
-import create from "zustand";
+import {create} from "zustand";
 import { axiosInstance } from "../lib/axios";
 
-const API_BASE = "/store"; // change to '/api/owner' or whatever your server uses
+const API_BASE = "/store"; 
 
 export const useStoreOwnerStore = create((set, get) => ({
   // data
@@ -10,8 +10,8 @@ export const useStoreOwnerStore = create((set, get) => ({
     average_rating: 0,
     total_ratings: 0,
   },
-  ratings: [],        // array of ratings (with user info)
-  count: 0,           // for ratings endpoint (if returned)
+  ratings: [],       
+  count: 0,          
 
   // ui state
   loading: false,
@@ -34,14 +34,11 @@ export const useStoreOwnerStore = create((set, get) => ({
       error: null,
     }),
 
-  // fetch dashboard: store + stats + ratings
   fetchDashboard: async (opts = {}) => {
     const { withLoader = true } = opts;
     try {
       if (withLoader) set({ loading: true, error: null });
       const res = await axiosInstance.get(`${API_BASE}/dashboard`);
-      // response shape expected:
-      // { success: true, data: { store, stats: { average_rating, total_ratings }, ratings } }
       const data = res.data;
       if (!data?.success) {
         throw new Error(data?.message || "Failed to fetch dashboard");
@@ -69,8 +66,6 @@ export const useStoreOwnerStore = create((set, get) => ({
     try {
       if (withLoader) set({ loading: true, error: null });
       const res = await axiosInstance.get(`${API_BASE}/store`);
-      // response shape expected:
-      // { success: true, store: { ... , stats: { average_rating, total_ratings } } }
       const data = res.data;
       if (!data?.success) {
         throw new Error(data?.message || "Failed to fetch store");

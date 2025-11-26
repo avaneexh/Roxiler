@@ -27,6 +27,7 @@ import UserDashboard from "./pages/user/UserDashboard";
 import UserStores from "./pages/user/UserStores";
 import MyRatings from "./pages/user/MyRatings";
 import ChangePassword from "./components/ChangePassword";
+import StoreDashboard from "./pages/userStore/StoreDash";
 // import UserHome from "./pages/user/UserHome";
 // import NotFound from "./pages/NotFound";
 
@@ -73,7 +74,7 @@ function App(){
 
         <Route element={<RequireAuth allowedRoles={['store_owner']} />}>
           <Route path="/store" element={<StoreLayout/>}>
-            {/* <Route index element={<StoreHome/>} /> */}
+            <Route index element={<StoreDashboard/>} />
            
           </Route>
         </Route>
