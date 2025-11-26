@@ -16,7 +16,6 @@ app.use(express.json());
 app.use(cookieParser());
 
 const WHITELIST = [
-  "https://roxiler-kappa.vercel.app",
   "http://localhost:5173" ,
   "https://roxiler-o925.onrender.com"
 ];
