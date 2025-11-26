@@ -111,7 +111,8 @@ export const login = async (req, res) => {
             email:user.email,
             name:user.name,
             role:user.role,
-            address:user.address
+            address:user.address,
+            created_at:user.created_at
          }   
         })
 
@@ -146,7 +147,7 @@ export const logout = async (req, res) => {
 
 export const check = async (req, res) => {
     try {
-        console.log("auth");
+        // console.log("auth");
         
         res.status(200).json({
          success:true,
@@ -160,3 +161,45 @@ export const check = async (req, res) => {
         })
     }
 }
+
+export const changePassword = async (req, res) => {
+  try {
+
+    // console.log("change psd");
+    
+
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: "currentPassword and newPassword required" });
+    }
+
+    const user = await db.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const match = await bcrypt.compare(String(currentPassword), user.password);
+    if (!match) {
+      return res.status(403).json({ success: false, message: "Current password is incorrect" });
+    }
+
+    const hashed = await bcrypt.hash(String(newPassword), 10);
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        password: hashed,
+      },
+    });
+
+
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
+  } catch (err) {
+    console.error("changePassword error:", err);
+    return res.status(500).json({ success: false, message: "Error changing password" });
+  }
+};

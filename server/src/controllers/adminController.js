@@ -51,7 +51,7 @@ export const getAllUsers = async (req, res) => {
       "email",
     ]);
     const orderField = ALLOWED_SORT_FIELDS.has(sortBy) ? sortBy : "created_at";
-    const orderDirection = (String(sortOrder).toLowerCase() === "asc") ? "asc" : "desc";
+    const orderDirection = String(sortOrder).toLowerCase() === "asc" ? "asc" : "desc";
 
     // Build Prisma "where" filter
     const where = {};
@@ -76,17 +76,35 @@ export const getAllUsers = async (req, res) => {
           address: true,
           created_at: true,
           updated_at: true,
+          // include the count of ratings for each user
+          _count: {
+            select: {
+              ratings: true,
+            },
+          },
         },
       }),
     ]);
 
+    // Map users to include a friendly ratingsCount field
+    const formattedUsers = users.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      address: u.address,
+      created_at: u.created_at,
+      updated_at: u.updated_at,
+      ratingsCount: u._count?.ratings ?? 0,
+    }));
+
     return res.status(200).json({
       success: true,
-      total,              // total matching records
-      count: users.length, // number of users in this page
+      total,               // total matching records
+      count: formattedUsers.length, // number of users in this page
       page: pageNum,
       perPage: take,
-      users,
+      users: formattedUsers,
     });
   } catch (error) {
     console.error("Error fetching all users:", error);

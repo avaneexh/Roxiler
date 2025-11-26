@@ -4,7 +4,8 @@ import {db} from "../db/db.js";
 export const getAllStores = async (req, res, next) => {
   try {
     const userId = req.user.id;
-
+    // console.log("getallstores");
+    
     // optional pagination (keep simple defaults)
     const page = Math.max(1, parseInt(req.query.page || "1", 10));
     const limit = Math.max(1, Math.min(100, parseInt(req.query.limit || "50", 10)));
