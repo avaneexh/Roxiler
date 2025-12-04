@@ -9,11 +9,11 @@ This project was developed as part of a Full Stack Coding Challenge .
 Users can rate stores from 1 to 5 and view ratings submitted by others.
 
 ## 🚀 Tech stack
-- **Frontend:** React (Vite or CRA) zod, zustand, tailwind
+- **Frontend:** React (Vite) zod, zustand, tailwind
 - **Backend:** Node.js + Express
 - **Database:** postgres
 - **Auth:** JWT 
-- **ORM (optional):** Prisma 
+- **ORM:** Prisma 
 
 ---
 
